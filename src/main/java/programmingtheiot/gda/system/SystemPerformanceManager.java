@@ -4,81 +4,125 @@
  * It is provided as a simple shell to guide the student and assist with
  * implementation for the Programming the Internet of Things exercises,
  * and designed to be modified by the student as needed.
- */
+ */ 
 
 package programmingtheiot.gda.system;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
-import programmingtheiot.gda.system.SystemPerformanceManager;
 import programmingtheiot.common.ConfigConst;
 import programmingtheiot.common.ConfigUtil;
 import programmingtheiot.common.IDataMessageListener;
 import programmingtheiot.common.ResourceNameEnum;
 import programmingtheiot.data.SystemPerformanceData;
 
+
 /**
  * Shell representation of class for student implementation.
  * 
  */
-public class SystemPerformanceManager {
+public class SystemPerformanceManager
+{
 	// private var's
-	private static final Logger _Logger = Logger.getLogger(SystemPerformanceManager.class.getName());
-
 	private int pollRate = ConfigConst.DEFAULT_POLL_CYCLES;
+	
+	private static final Logger _Logger = 
+		Logger.getLogger(SystemPerformanceManager.class.getName());
+
 	private ScheduledExecutorService schedExecSvc = null;
 	private SystemCpuUtilTask sysCpuUtilTask = null;
 	private SystemMemUtilTask sysMemUtilTask = null;
+	private SystemDiskUtilTask sysDiskUtilTask = null;
 
 	private Runnable taskRunner = null;
 	private boolean isStarted = false;
-	// constructors
 
+	private String locationID = ConfigConst.NOT_SET;
+	private IDataMessageListener dataMsgListener = null;
+	
+	// constructors
+	
 	/**
-	 * Default.
+	 * Determina la frecuencia con la que se recuperan los datos.
+	 * Crea un objeto ScheduledExecutorService con un solo hilo que servirá para ejecutar las tareas de recuperación de datos.
+	 * Luego, instancia un objeto SystemCpuUtilTask y un objeto SystemMemUtilTask.
+	 * Finalmente, crea un objeto Runnable que se utilizará para ejecutar la tarea recuperar telemetría
 	 * 
 	 */
-	public SystemPerformanceManager() {
-		this.pollRate = ConfigUtil.getInstance().getInteger(
-				ConfigConst.GATEWAY_DEVICE, ConfigConst.POLL_CYCLES_KEY, ConfigConst.DEFAULT_POLL_CYCLES);
+	public SystemPerformanceManager()
+		{
+			this.pollRate =
+			ConfigUtil.getInstance().getInteger(
+				ConfigConst.GATEWAY_DEVICE,ConfigConst.POLL_CYCLES_KEY,ConfigConst.DEFAULT_POLL_CYCLES);
 
-		if (this.pollRate <= 0) {
-			this.pollRate = ConfigConst.DEFAULT_POLL_CYCLES;
+			if (this.pollRate <=0) {
+				this.pollRate =ConfigConst.DEFAULT_POLL_CYCLES;
+			}
+
+			this.schedExecSvc   = Executors.newScheduledThreadPool(1);
+			this.sysCpuUtilTask = new SystemCpuUtilTask();
+			this.sysMemUtilTask = new SystemMemUtilTask();
+			this.sysDiskUtilTask = new SystemDiskUtilTask();
+
+			this.taskRunner = () -> {
+				this.handleTelemetry();
+			};
+
+			this.locationID =
+			ConfigUtil.getInstance().getProperty(
+				ConfigConst.GATEWAY_DEVICE, ConfigConst.LOCATION_ID_PROP, ConfigConst.NOT_SET);
 		}
-
-		this.schedExecSvc = Executors.newScheduledThreadPool(1);
-		this.sysCpuUtilTask = new SystemCpuUtilTask();
-		this.sysMemUtilTask = new SystemMemUtilTask();
-
-		this.taskRunner = () -> {
-			this.handleTelemetry();
-		};
-	}
-
+	
+	
 	// public methods
-
-	public void handleTelemetry() {
+	
+	public void handleTelemetry()
+	{
 		float cpuUtil = this.sysCpuUtilTask.getTelemetryValue();
 		float memUtil = this.sysMemUtilTask.getTelemetryValue();
+		float diskUtil = this.sysDiskUtilTask.getTelemetryValue();
 
-		// NOTE: you may need to change the logging level to 'info' to see the message
-		_Logger.fine("CPU utilization: " + cpuUtil + ", Mem utilization: " + memUtil);
+		// TODO: change the log level to 'info' for testing purposes
+		_Logger.info("CPU utilization: " + cpuUtil + ", Mem utilization: " + memUtil + ", Disk utilization: " + diskUtil);
+
+		SystemPerformanceData spd = new SystemPerformanceData();
+		spd.setLocationID(this.locationID);
+		spd.setCpuUtilization(cpuUtil);
+		spd.setMemoryUtilization(memUtil);
+		spd.setDiskUtilization(diskUtil);
+
+		if (this.dataMsgListener != null) {
+			this.dataMsgListener.handleSystemPerformanceMessage(
+				ResourceNameEnum.GDA_SYSTEM_PERF_MSG_RESOURCE, spd);
+		}
 	}
-
-	public void setDataMessageListener(IDataMessageListener listener) {
+	
+	public void setDataMessageListener(IDataMessageListener listener)
+	{
+		if (listener != null) {
+			this.dataMsgListener = listener;
+		}
 	}
-
-	public boolean startManager() {
-		if (!this.isStarted) {
+	
+	/**
+	 * Inicia el SystemPerformanceManager.
+	 * Si no está iniciado, se inicia el SystemPerformanceManager y se ejecuta la tarea de recuperación de datos.
+	 * La tarea de telemetría ejecuta cada pollRate segundos a través de un futureTask, en el ejecutor.
+	 * 
+	 * @return boolean
+	 */
+	public boolean startManager()
+	{
+		if (! this.isStarted) {
 			_Logger.info("SystemPerformanceManager is starting...");
 
-			ScheduledFuture<?> futureTask = this.schedExecSvc.scheduleAtFixedRate(this.taskRunner, 1L, this.pollRate,
-					TimeUnit.SECONDS);
+			ScheduledFuture<?> futureTask =
+				this.schedExecSvc.scheduleAtFixedRate(this.taskRunner, 1L, this.pollRate, TimeUnit.SECONDS);
 
 			this.isStarted = true;
 		} else {
@@ -88,7 +132,8 @@ public class SystemPerformanceManager {
 		return this.isStarted;
 	}
 
-	public boolean stopManager() {
+	public boolean stopManager()
+	{
 		this.schedExecSvc.shutdown();
 		this.isStarted = false;
 
