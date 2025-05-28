@@ -18,88 +18,70 @@ import programmingtheiot.common.ConfigConst;
  */
 public class ActuatorData extends BaseIotData implements Serializable
 {
-	private float value        =ConfigConst.DEFAULT_VAL;
+	// static
+	
+	
+	// private var's
 	private int command      =ConfigConst.DEFAULT_COMMAND;
+	private float value        =ConfigConst.DEFAULT_VAL;
 	private boolean isResponse   =false;
 	private String stateData    ="";
-
+    
+    
 	// constructors
-
 	public ActuatorData()
 		{
 	super();
 		}
-
-
+	
 	// public methods
-
+	
 	public int getCommand()
-		{
-	return this.command;
-		}
+	{
+		return this.command;
+	}
 
 	public String getStateData()
-		{
-	return this.stateData;
-		}
-
+	{
+		return this.stateData;
+	}
+	
 	public float getValue()
-		{
-	return this.value;
-		}
-
+	{
+		return this.value;
+	}
+	
 	public boolean isResponseFlagEnabled()
-		{
-	return this.isResponse;
-		}
-
+	{
+		return this.isResponse;
+	}
+	
 	public void setAsResponse()
-		{
-	updateTimeStamp();
-	this.isResponse =true;
-		}
-
+	{
+		updateTimeStamp();
+		this.isResponse =true;
+	}
+	
 	public void setCommand(int command)
-		{
-	updateTimeStamp();
-	this.command =command;
-		}
+	{
+		updateTimeStamp();
+		this.command =command;
+	}
 
 	public void setStateData(String stateData)
-		{
-	updateTimeStamp();
+	{
+		updateTimeStamp();
 
-	if (stateData !=null) {
-	this.stateData =stateData;
+		if (stateData !=null) {
+		this.stateData =stateData;
 			}
-		}
-
-	public void setValue(float val)
-		{
-	updateTimeStamp();
-	this.value =val;
-		}
-
-
-	// protected methods
+	}
 	
-	/* (non-Javadoc)
-	 * @see programmingtheiot.data.BaseIotData#handleUpdateData(programmingtheiot.data.BaseIotData)
-	 */
-
-	protected void handleUpdateData(BaseIotData data)
-		{
-	if (data instanceof ActuatorData) {
-	ActuatorData aData = (ActuatorData)data;
-	this.setCommand(aData.getCommand());
-	this.setValue(aData.getValue());
-	this.setStateData(aData.getStateData());
-
-	if (aData.isResponseFlagEnabled()) {
-	this.isResponse =true;
-				}
-			}
-		}
+	public void setValue(float val)
+	{
+		updateTimeStamp();
+		this.value =val;
+	}
 	
 	/**
 	 * Returns a string representation of this instance. This will invoke the base class
@@ -117,6 +99,26 @@ public class ActuatorData extends BaseIotData implements Serializable
 		sb.append(ConfigConst.VALUE_PROP).append('=').append(this.getValue());
 		
 		return sb.toString();
+	}
+	
+	
+	// protected methods
+	
+	/* (non-Javadoc)
+	 * @see programmingtheiot.data.BaseIotData#handleUpdateData(programmingtheiot.data.BaseIotData)
+	 */
+	protected void handleUpdateData(BaseIotData data)
+	{
+		if (data instanceof ActuatorData) {
+			ActuatorData aData = (ActuatorData)data;
+			this.setCommand(aData.getCommand());
+			this.setValue(aData.getValue());
+			this.setStateData(aData.getStateData());
+		
+			if (aData.isResponseFlagEnabled()) {
+			this.isResponse =true;
+						}
+					}
 	}
 	
 }

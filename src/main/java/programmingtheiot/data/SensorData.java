@@ -18,40 +18,32 @@ import programmingtheiot.common.ConfigConst;
  */
 public class SensorData extends BaseIotData implements Serializable
 {
+	// static
+	
+	
 	// private var's
-
+	
 	private float value =ConfigConst.DEFAULT_VAL;
-
+    
 	// constructors
-
+	
 	public SensorData()
-		{
-	super();
-		}
-
-
+	{
+		super();
+	}
+	
 	// public methods
-
+	
 	public float getValue()
-		{
-	return this.value;
-		}
-
+	{
+		return this.value;
+	}
+	
 	public void setValue(float val)
-		{
-	super.updateTimeStamp();
-	this.value = val;
-		}
-
-	// protected methods
-
-	protected void handleUpdateData(BaseIotData data)
-		{
-	if (data instanceof SensorData) {
-	SensorData sData = (SensorData)data;
-	this.setValue(sData.getValue());
-			}
-		}
+	{
+		super.updateTimeStamp();
+		this.value = val;
+	}
 	
 	/**
 	 * Returns a string representation of this instance. This will invoke the base class
@@ -67,6 +59,20 @@ public class SensorData extends BaseIotData implements Serializable
 		sb.append(ConfigConst.VALUE_PROP).append('=').append(this.getValue());
 		
 		return sb.toString();
+	}
+	
+	
+	// protected methods
+	
+	/* (non-Javadoc)
+	 * @see programmingtheiot.data.BaseIotData#handleUpdateData(programmingtheiot.data.BaseIotData)
+	 */
+	protected void handleUpdateData(BaseIotData data)
+	{
+		if (data instanceof SensorData) {
+			SensorData sData = (SensorData)data;
+			this.setValue(sData.getValue());
+					}
 	}
 	
 }
