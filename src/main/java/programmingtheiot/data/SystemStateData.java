@@ -24,92 +24,102 @@ import programmingtheiot.common.ConfigConst;
  */
 public class SystemStateData extends BaseIotData implements Serializable
 {
-    // static
+	// static
+	
+	
+	// private var's
+	private int command =ConfigConst.DEFAULT_COMMAND;
+	private List<SystemPerformanceData>sysPerfDataList =null;
+	private List<SensorData>sensorDataList =null;
+	
     
     
-    // private var's
-    private int command = ConfigConst.DEFAULT_COMMAND;
-    private List<SystemPerformanceData> sysPerfDataList = null;
-    private List<SensorData> sensorDataList = null;
-        
-    // constructors
-    public SystemStateData()
-    {
-        super();
+	// constructors
+	
+	public SystemStateData()
+	{
+		super();
+		super.setName(ConfigConst.SYS_STATE_DATA);
 
-        super.setName(ConfigConst.SYS_STATE_DATA);
-
-        this.sysPerfDataList = new ArrayList<>();
-        this.sensorDataList  = new ArrayList<>();
-    }
-    
-    // public methods
-    public boolean addSensorData(SensorData data)
-    {
-        if (data != null) {
+		this.sysPerfDataList =new ArrayList<>();
+		this.sensorDataList  =new ArrayList<>();
+	}
+	
+	
+	// public methods
+	
+	public boolean addSensorData(SensorData data)
+	{
+		if (data != null) {
             this.sensorDataList.add(data);
             return true;
         }
         return false;
-    }
-    
-    public boolean addSystemPerformanceData(SystemPerformanceData data)
-    {
-        if (data != null) {
+	}
+	
+	public boolean addSystemPerformanceData(SystemPerformanceData data)
+	{
+		if (data != null) {
             this.sysPerfDataList.add(data);
             return true;
         }
         return false;
-    }
-    
-    public int getCommand()
-    {
-        return this.command;
-    }
-    
-    public List<SensorData> getSensorDataList()
-    {
-        return this.sensorDataList;
-    }
-    
-    public List<SystemPerformanceData> getSystemPerformanceDataList()
-    {
-        return this.sysPerfDataList;
-    }
-    
-    public void setCommand(int actionCmd)
-    {
-        this.command = actionCmd;
-    }
-    
-    /**
-     * Returns a string representation of this instance. This will invoke the base class
-     * {@link #toString()} method, then append the output from this call.
-     * 
-     * @return String The string representing this instance, returned in CSV 'key=value' format.
-     */
-    @Override
-    public String toString()
-    {
-        StringBuilder sb = new StringBuilder(super.toString());
-        
-        sb.append(',');
-        sb.append(ConfigConst.COMMAND_PROP).append('=').append(this.getCommand()).append(',');
-        sb.append(ConfigConst.SENSOR_DATA_LIST_PROP).append('=').append(this.getSensorDataList()).append(',');
-        sb.append(ConfigConst.SYSTEM_PERF_DATA_LIST_PROP).append('=').append(this.getSystemPerformanceDataList());
-        
-        return sb.toString();
-    }
-    
-    // protected methods
-    @Override
-    protected void handleUpdateData(BaseIotData data)
-    {
-        if (data instanceof SystemStateData) {
+	}
+	
+	public int getCommand()
+	{
+		return this.command;
+	}
+	
+	public List<SensorData> getSensorDataList()
+	{
+		return this.sensorDataList;
+	}
+	
+	public List<SystemPerformanceData> getSystemPerformanceDataList()
+	{
+		return this.sysPerfDataList;
+	}
+	
+	public void setCommand(int actionCmd)
+	{
+		this.command = actionCmd;
+	}
+	
+	/**
+	 * Returns a string representation of this instance. This will invoke the base class
+	 * {@link #toString()} method, then append the output from this call.
+	 * 
+	 * @return String The string representing this instance, returned in CSV 'key=value' format.
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder(super.toString());
+		
+		sb.append(',');
+		sb.append(ConfigConst.COMMAND_PROP).append('=').append(this.getCommand()).append(',');
+		sb.append(ConfigConst.SENSOR_DATA_LIST_PROP).append('=').append(this.getSensorDataList()).append(',');
+		sb.append(ConfigConst.SYSTEM_PERF_DATA_LIST_PROP).append('=').append(this.getSystemPerformanceDataList());
+		
+		return sb.toString();
+	}
+	
+	
+	// protected methods
+	
+	/* (non-Javadoc)
+	 * @see programmingtheiot.data.BaseIotData#handleUpdateData(programmingtheiot.data.BaseIotData)
+	 */
+	@Override
+	protected void handleUpdateData(BaseIotData data)
+	{
+		if (data instanceof SystemStateData) {
             SystemStateData ssd = (SystemStateData) data;
             this.setCommand(ssd.getCommand());
             this.sensorDataList = ssd.getSensorDataList();
             this.sysPerfDataList = ssd.getSystemPerformanceDataList();
         }
-    }
+	}
+	
 }

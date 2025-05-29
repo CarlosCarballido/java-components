@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -20,7 +21,6 @@ import programmingtheiot.common.ConfigUtil;
 import programmingtheiot.common.IDataMessageListener;
 import programmingtheiot.common.ResourceNameEnum;
 import programmingtheiot.data.SystemPerformanceData;
-
 
 /**
  * Shell representation of class for student implementation.
@@ -33,50 +33,44 @@ public class SystemPerformanceManager
 	
 	private static final Logger _Logger = 
 		Logger.getLogger(SystemPerformanceManager.class.getName());
-
+	
 	private ScheduledExecutorService schedExecSvc = null;
 	private SystemCpuUtilTask sysCpuUtilTask = null;
 	private SystemMemUtilTask sysMemUtilTask = null;
-	private SystemDiskUtilTask sysDiskUtilTask = null;
-
+		
 	private Runnable taskRunner = null;
-	private boolean isStarted = false;
+	private boolean isStarted = false;	
 
 	private String locationID = ConfigConst.NOT_SET;
 	private IDataMessageListener dataMsgListener = null;
-	
+
 	// constructors
-	
 	/**
-	 * Determina la frecuencia con la que se recuperan los datos.
-	 * Crea un objeto ScheduledExecutorService con un solo hilo que servirá para ejecutar las tareas de recuperación de datos.
-	 * Luego, instancia un objeto SystemCpuUtilTask y un objeto SystemMemUtilTask.
-	 * Finalmente, crea un objeto Runnable que se utilizará para ejecutar la tarea recuperar telemetría
+	 * Default.
 	 * 
 	 */
 	public SystemPerformanceManager()
-		{
-			this.pollRate =
+	{
+		this.pollRate =
 			ConfigUtil.getInstance().getInteger(
-				ConfigConst.GATEWAY_DEVICE,ConfigConst.POLL_CYCLES_KEY,ConfigConst.DEFAULT_POLL_CYCLES);
+				ConfigConst.GATEWAY_DEVICE, ConfigConst.POLL_CYCLES_KEY, ConfigConst.DEFAULT_POLL_CYCLES);
 
-			if (this.pollRate <=0) {
-				this.pollRate =ConfigConst.DEFAULT_POLL_CYCLES;
-			}
-
-			this.schedExecSvc   = Executors.newScheduledThreadPool(1);
-			this.sysCpuUtilTask = new SystemCpuUtilTask();
-			this.sysMemUtilTask = new SystemMemUtilTask();
-			this.sysDiskUtilTask = new SystemDiskUtilTask();
-
-			this.taskRunner = () -> {
-				this.handleTelemetry();
-			};
-
-			this.locationID =
-			ConfigUtil.getInstance().getProperty(
-				ConfigConst.GATEWAY_DEVICE, ConfigConst.LOCATION_ID_PROP, ConfigConst.NOT_SET);
+		if (this.pollRate <= 0) {
+			this.pollRate = ConfigConst.DEFAULT_POLL_CYCLES;
 		}
+
+		this.schedExecSvc   = Executors.newScheduledThreadPool(1);
+		this.sysCpuUtilTask = new SystemCpuUtilTask();
+		this.sysMemUtilTask = new SystemMemUtilTask();
+
+		this.taskRunner = () -> {
+			this.handleTelemetry();
+		};
+		this.locationID =
+		ConfigUtil.getInstance().getProperty(
+			ConfigConst.GATEWAY_DEVICE, ConfigConst.LOCATION_ID_PROP, ConfigConst.NOT_SET);
+
+	}
 	
 	
 	// public methods
@@ -85,16 +79,14 @@ public class SystemPerformanceManager
 	{
 		float cpuUtil = this.sysCpuUtilTask.getTelemetryValue();
 		float memUtil = this.sysMemUtilTask.getTelemetryValue();
-		float diskUtil = this.sysDiskUtilTask.getTelemetryValue();
 
-		// TODO: change the log level to 'info' for testing purposes
-		_Logger.info("CPU utilization: " + cpuUtil + ", Mem utilization: " + memUtil + ", Disk utilization: " + diskUtil);
+		// NOTE: you may need to change the logging level to 'info' to see the message
+		_Logger.fine("CPU utilization: " + cpuUtil + ", Mem utilization: " + memUtil);
 
 		SystemPerformanceData spd = new SystemPerformanceData();
 		spd.setLocationID(this.locationID);
 		spd.setCpuUtilization(cpuUtil);
 		spd.setMemoryUtilization(memUtil);
-		spd.setDiskUtilization(diskUtil);
 
 		if (this.dataMsgListener != null) {
 			this.dataMsgListener.handleSystemPerformanceMessage(
@@ -109,13 +101,6 @@ public class SystemPerformanceManager
 		}
 	}
 	
-	/**
-	 * Inicia el SystemPerformanceManager.
-	 * Si no está iniciado, se inicia el SystemPerformanceManager y se ejecuta la tarea de recuperación de datos.
-	 * La tarea de telemetría ejecuta cada pollRate segundos a través de un futureTask, en el ejecutor.
-	 * 
-	 * @return boolean
-	 */
 	public boolean startManager()
 	{
 		if (! this.isStarted) {
@@ -131,7 +116,7 @@ public class SystemPerformanceManager
 
 		return this.isStarted;
 	}
-
+	
 	public boolean stopManager()
 	{
 		this.schedExecSvc.shutdown();
@@ -141,5 +126,6 @@ public class SystemPerformanceManager
 
 		return true;
 	}
-
+	
+	
 }
