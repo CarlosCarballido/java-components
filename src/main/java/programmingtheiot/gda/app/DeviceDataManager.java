@@ -202,7 +202,6 @@ public class DeviceDataManager implements IDataMessageListener
 				// TODO: take appropriate action
 			}
 		}
-
 		if (this.sysPerfMgr != null) {
 			this.sysPerfMgr.startManager();
 		}
@@ -213,7 +212,6 @@ public class DeviceDataManager implements IDataMessageListener
 		if (this.sysPerfMgr != null) {
 			this.sysPerfMgr.stopManager();
 		}
-
 		if (this.mqttClient != null) {
 			// add necessary un-subscribes
 
@@ -276,6 +274,7 @@ public class DeviceDataManager implements IDataMessageListener
 	if (this.enableCloudClient) {
 		// TODO: implement this in Lab Module 10
 	}
+}
 
 	if (this.enablePersistenceClient) {
 		// TODO: implement this as an optional exercise in Lab Module 5
