@@ -24,7 +24,6 @@ public class SensorData extends BaseIotData implements Serializable
 	// private var's
 	
 	private float value =ConfigConst.DEFAULT_VAL;
-	private String location;
     
 	// constructors
 	
@@ -45,16 +44,6 @@ public class SensorData extends BaseIotData implements Serializable
 		super.updateTimeStamp();
 		this.value = val;
 	}
-
-	public String setLocation(String location)
-	{
-		super.updateTimeStamp();
-		if (location == null || location.isEmpty()) {
-			throw new IllegalArgumentException("Location cannot be null or empty.");
-		}
-		this.location = location;
-		return this.location;
-    }
 	
 	/**
 	 * Returns a string representation of this instance. This will invoke the base class

@@ -11,7 +11,6 @@ package programmingtheiot.part02.integration.data;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -70,62 +69,19 @@ public class DataIntegrationTest
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception
 	{
-		// Intentamos obtener las rutas desde el archivo de configuración
 		_CdaDataPath = ConfigUtil.getInstance().getProperty(ConfigConst.GATEWAY_DEVICE, ConfigConst.TEST_CDA_DATA_PATH_KEY);
 		_GdaDataPath = ConfigUtil.getInstance().getProperty(ConfigConst.GATEWAY_DEVICE, ConfigConst.TEST_GDA_DATA_PATH_KEY);
 		
-		// Si alguna ruta es null, asignamos un valor por defecto para que no falle
-		if (_CdaDataPath == null || _CdaDataPath.isEmpty()) {
-			_CdaDataPath = "/tmp/cda";
-			System.out.println("WARNING: CDA data path not set in config, using default: " + _CdaDataPath);
-		}
-		
-		if (_GdaDataPath == null || _GdaDataPath.isEmpty()) {
-			_GdaDataPath = "/tmp/gda";
-			System.out.println("WARNING: GDA data path not set in config, using default: " + _GdaDataPath);
-		}
-		
-		// Crear directorios si no existen
 		try {
-			File cdaPathDir = new File(_CdaDataPath);
-			if (!cdaPathDir.exists()) {
-				boolean created = cdaPathDir.mkdirs();
-				System.out.println("CDA data path directory created: " + created);
-			}
-			File gdaPathDir = new File(_GdaDataPath);
-			if (!gdaPathDir.exists()) {
-				boolean created = gdaPathDir.mkdirs();
-				System.out.println("GDA data path directory created: " + created);
+			File gdaPath = new File(_GdaDataPath);
+			if (! gdaPath.exists()) {
+				gdaPath.mkdirs();
 			}
 		} catch (Exception e) {
-			_Logger.log(Level.WARNING, "Failed to create data path directories", e);
+			_Logger.log(Level.WARNING, "Failed to create GDA path hierarchy: " + _GdaDataPath, e);
 		}
 	}
-
-	@BeforeClass
-	public static void prepareSensorDataFile() throws Exception {
-		if (_CdaDataPath == null || _CdaDataPath.isEmpty()) {
-			_CdaDataPath = System.getProperty("java.io.tmpdir") + "/cda";
-		}
-
-		File cdaDir = new File(_CdaDataPath);
-		if (!cdaDir.exists()) {
-			if (!cdaDir.mkdirs()) {
-				throw new IOException("Failed to create directory: " + _CdaDataPath);
-			}
-		}
-
-		String sensorFilePath = _CdaDataPath + "/SensorData.dat";
-
-		SensorData sensorData = new SensorData();
-		sensorData.setName(DEFAULT_NAME);
-		sensorData.setLocation(DEFAULT_LOCATION);
-		sensorData.setValue(DEFAULT_VAL);
-
-		String jsonData = DataUtil.getInstance().sensorDataToJson(sensorData);
-		Path path = FileSystems.getDefault().getPath(sensorFilePath);
-		Files.writeString(path, jsonData, StandardCharsets.UTF_8);
-	}
+	
 	/**
 	 * @throws java.lang.Exception
 	 */
@@ -236,28 +192,25 @@ public class DataIntegrationTest
 	@Test
 	public void testReadActuatorDataFromCdaDataPath()
 	{
+		// Read JSON from CDA filesystem
 		String fileName = _CdaDataPath + "/ActuatorData.dat";
-		Path filePath = FileSystems.getDefault().getPath(fileName);
-
-		// Crear archivo con contenido válido si no existe
-		if (!Files.exists(filePath)) {
-			try {
-				String dataStr = DataUtil.getInstance().actuatorDataToJson(new ActuatorData());
-				Files.writeString(filePath, dataStr, StandardCharsets.UTF_8);
-			} catch (Exception e) {
-				fail("No se pudo crear el archivo necesario para el test: " + e.getMessage());
-			}
-		}
-
+		
+		_Logger.info("\n\n----- [ActuatorData JSON from file to object] -----");
+		
 		try {
-			String dataStr = Files.readString(filePath, StandardCharsets.UTF_8);
+			Path   filePath = FileSystems.getDefault().getPath(fileName);
+			String dataStr  = Files.readString(filePath, StandardCharsets.UTF_8);
+			
 			ActuatorData dataObj = DataUtil.getInstance().jsonToActuatorData(dataStr);
-			assertNotNull(dataObj);
+
+			_Logger.info("ActuatorData JSON from CDA: " + dataStr);
+			_Logger.info("ActuatorData object: " + dataObj);
 		} catch (Exception e) {
-			fail("Fallo leyendo el archivo: " + fileName);
+			_Logger.log(Level.WARNING, "Failed to read file: " + fileName, e);
+			
+			fail("Failed to read file: " + fileName);
 		}
 	}
-
 	
 	/**
 	 * Tests SensorData <- CDA filesystem.
@@ -289,18 +242,26 @@ public class DataIntegrationTest
 	 * Tests SystemPerformanceData <- CDA filesystem.
 	 */
 	@Test
-	public void testReadSystemPerformanceDataFromCdaDataPath() throws Exception {
+	public void testReadSystemPerformanceDataFromCdaDataPath()
+	{
+		// Read JSON from CDA filesystem
 		String fileName = _CdaDataPath + "/SystemPerformanceData.dat";
-		Path filePath = FileSystems.getDefault().getPath(fileName);
+		
+		_Logger.info("\n\n----- [SystemPerformanceData JSON from file to object] -----");
+		
+		try {
+			Path   filePath = FileSystems.getDefault().getPath(fileName);
+			String dataStr  = Files.readString(filePath, StandardCharsets.UTF_8);
+			
+			SystemPerformanceData dataObj = DataUtil.getInstance().jsonToSystemPerformanceData(dataStr);
 
-		if (!Files.exists(filePath)) {
-			Files.writeString(filePath, DataUtil.getInstance().systemPerformanceDataToJson(new SystemPerformanceData()), StandardCharsets.UTF_8);
+			_Logger.info("SystemPerformanceData JSON from CDA: " + dataStr);
+			_Logger.info("SystemPerformanceData object: " + dataObj);
+		} catch (Exception e) {
+			_Logger.log(Level.WARNING, "Failed to read file: " + fileName, e);
+			
+			fail("Failed to read file: " + fileName);
 		}
-
-		String dataStr = Files.readString(filePath, StandardCharsets.UTF_8);
-		SystemPerformanceData dataObj = DataUtil.getInstance().jsonToSystemPerformanceData(dataStr);
-		assertNotNull(dataObj);
 	}
-
 	
 }
