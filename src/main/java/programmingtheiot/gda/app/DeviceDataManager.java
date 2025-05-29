@@ -102,26 +102,20 @@ public class DeviceDataManager implements IDataMessageListener
 	
 	
 	// public methods
-
-	@Override
-	public boolean handleActuatorCommandRequest(ResourceNameEnum resourceName, ActuatorData data)
-	{
-		return false;
-	}
 	
 	@Override
 	public boolean handleActuatorCommandResponse(ResourceNameEnum resourceName, ActuatorData data)
 	{
 		if (data != null) {
 			_Logger.info("Handling actuator response: " + data.getName());
-
+	
 			// this next call is optional for now
 			//this.handleIncomingDataAnalysis(resourceName, data);
-
+	
 			if (data.hasError()) {
 				_Logger.warning("Error flag set for ActuatorData instance.");
 			}
-
+	
 			return true;
 		} else {
 			return false;
@@ -129,11 +123,17 @@ public class DeviceDataManager implements IDataMessageListener
 	}
 
 	@Override
+	public boolean handleActuatorCommandRequest(ResourceNameEnum resourceName, ActuatorData data)
+	{
+		return false;
+	}
+
+	@Override
 	public boolean handleIncomingMessage(ResourceNameEnum resourceName, String msg)
 	{
 		if (msg != null) {
 			_Logger.info("Handling incoming generic message: " + msg);
-
+	
 			return true;
 		} else {
 			return false;
@@ -145,11 +145,11 @@ public class DeviceDataManager implements IDataMessageListener
 	{
 		if (data != null) {
 			_Logger.info("Handling sensor message: " + data.getName());
-
+	
 			if (data.hasError()) {
 				_Logger.warning("Error flag set for SensorData instance.");
 			}
-
+	
 			return true;
 		} else {
 			return false;
@@ -161,11 +161,11 @@ public class DeviceDataManager implements IDataMessageListener
 	{
 		if (data != null) {
 			_Logger.info("Handling system performance message: " + data.getName());
-
+	
 			if (data.hasError()) {
 				_Logger.warning("Error flag set for SystemPerformanceData instance.");
 			}
-
+	
 			return true;
 		} else {
 			return false;
@@ -178,27 +178,9 @@ public class DeviceDataManager implements IDataMessageListener
 	
 	public void startManager()
 	{
-		if (this.enableSystemPerf && this.sysPerfMgr != null) {
+		if (this.sysPerfMgr != null) {
 			this.sysPerfMgr.startManager();
 		}
-
-		if (this.enableMqttClient && this.mqttClient != null) {
-			// TODO: implement this in Lab Module 7
-		}
-
-		if (this.enableCoapServer && this.coapServer != null) {
-			// TODO: implement this in Lab Module 8
-		}
-
-		if (this.enableCloudClient && this.cloudClient != null) {
-			// TODO: implement this in Lab Module 10
-		}
-
-		if (this.enablePersistenceClient && this.persistenceClient != null) {
-			// TODO: implement this as an optional exercise in Lab Module 5
-		}
-
-		_Logger.info("DeviceDataManager started.");
 	}
 	
 	public void stopManager()
@@ -206,24 +188,6 @@ public class DeviceDataManager implements IDataMessageListener
 		if (this.sysPerfMgr != null) {
 			this.sysPerfMgr.stopManager();
 		}
-
-		if (this.enableMqttClient && this.mqttClient != null) {
-			// TODO: implement stopping MQTT client in Lab Module 7
-		}
-
-		if (this.enableCoapServer && this.coapServer != null) {
-			// TODO: implement stopping CoAP server in Lab Module 8
-		}
-
-		if (this.enableCloudClient && this.cloudClient != null) {
-			// TODO: implement stopping Cloud client in Lab Module 10
-		}
-
-		if (this.enablePersistenceClient && this.persistenceClient != null) {
-			// TODO: implement stopping Persistence client in Lab Module 5
-		}
-
-		_Logger.info("DeviceDataManager stopped.");
 	}
 
 	
@@ -237,35 +201,35 @@ public class DeviceDataManager implements IDataMessageListener
 	private void initConnections()
 	{
 	}
-
+	
 	private void initManager()
-	{
-		ConfigUtil configUtil = ConfigUtil.getInstance();
+{
+	ConfigUtil configUtil = ConfigUtil.getInstance();
 
-		this.enableSystemPerf =
-			configUtil.getBoolean(ConfigConst.GATEWAY_DEVICE,  ConfigConst.ENABLE_SYSTEM_PERF_KEY);
+	this.enableSystemPerf =
+		configUtil.getBoolean(ConfigConst.GATEWAY_DEVICE,  ConfigConst.ENABLE_SYSTEM_PERF_KEY);
 
-		if (this.enableSystemPerf) {
-			this.sysPerfMgr = new SystemPerformanceManager();
-			this.sysPerfMgr.setDataMessageListener(this);
-		}
-
-		if (this.enableMqttClient) {
-			// TODO: implement this in Lab Module 7
-		}
-
-		if (this.enableCoapServer) {
-			// TODO: implement this in Lab Module 8
-		}
-
-		if (this.enableCloudClient) {
-			// TODO: implement this in Lab Module 10
-		}
-
-		if (this.enablePersistenceClient) {
-			// TODO: implement this as an optional exercise in Lab Module 5
-		}
+	if (this.enableSystemPerf) {
+		this.sysPerfMgr = new SystemPerformanceManager();
+		this.sysPerfMgr.setDataMessageListener(this);
 	}
+
+	if (this.enableMqttClient) {
+		// TODO: implement this in Lab Module 7
+	}
+
+	if (this.enableCoapServer) {
+		// TODO: implement this in Lab Module 8
+	}
+
+	if (this.enableCloudClient) {
+		// TODO: implement this in Lab Module 10
+	}
+
+	if (this.enablePersistenceClient) {
+		// TODO: implement this as an optional exercise in Lab Module 5
+	}
+}
 
 	private void handleIncomingDataAnalysis(ResourceNameEnum resourceName, ActuatorData data)
 	{
@@ -281,6 +245,5 @@ public class DeviceDataManager implements IDataMessageListener
 	{
 		_Logger.fine("handleUpstreamTransmission method called.");
 		return true;
-	}
-	
+	}	
 }
