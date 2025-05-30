@@ -1,11 +1,3 @@
-/**
- * This class is part of the Programming the Internet of Things project.
- * 
- * It is provided as a simple shell to guide the student and assist with
- * implementation for the Programming the Internet of Things exercises,
- * and designed to be modified by the student as needed.
- */ 
-
  package programmingtheiot.gda.connection;
  import java.util.Properties;
  import java.util.logging.Level;
